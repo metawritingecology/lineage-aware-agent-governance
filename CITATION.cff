@@ -11,11 +11,11 @@ type: dataset
 license: CC-BY-4.0
 authors:
   - name: "Meta-Writing Ecology"
-# Publish-time fields (set when repo location and release date are fixed):
-# repository-code: "https://github.com/metawritingecology/lineage-aware-agent-governance"
-# url: "https://metawritingecology.org/"
-# version: "0.1.0-draft"
-# date-released: "YYYY-MM-DD"
+repository-code: "https://github.com/metawritingecology/lineage-aware-agent-governance"
+# Remaining publish-time fields, deliberately left unset:
+# url: set only once this surface is featured on the MWE site (owner-reserved cross-link).
+# version / date-released: set only when the repo goes public and a release is cut;
+#   asserting them now would claim a release that has not happened.
 keywords:
   - multi-agent
   - governance

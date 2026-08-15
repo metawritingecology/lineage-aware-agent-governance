@@ -9,7 +9,8 @@ high-intensity multi-agent working environment.
 - **Relation to Meta-Writing Ecology:** Candidate / related surface — compatible
   with MWE concerns but **not** a confirmed MWE component. Any formal relation
   must be established separately through the applicable MWE authority process.
-- **License:** [CC BY 4.0](LICENSE) for text and diagrams. Attribution does not
+- **License:** [CC BY 4.0](LICENSE) for text and diagrams; source code under
+  `scripts/` is under the [MIT License](scripts/LICENSE). Attribution does not
   imply endorsement.
 
 ## What this is
@@ -58,10 +59,18 @@ questions.
 lineage-aware-agent-governance/
 ├── README.md              this file
 ├── GOVERNANCE_SURFACE.md  the full boundary surface (single authoritative doc)
-├── LICENSE                CC BY 4.0 (full legal code)
-├── NOTICE                 attribution notice
+├── AGENTS.md              agent-participation rules (operational scaffolding)
+├── AGENT_WORKLOG.md       append-only agent worklog (operational scaffolding)
+├── scripts/               worklog governance check (MIT-licensed)
+├── LICENSE                CC BY 4.0, full legal code (text and diagrams)
+├── NOTICE                 licensing and relation notice
 └── CITATION.cff           citation metadata
 ```
+
+The conceptual public surface is the single boundary document
+`GOVERNANCE_SURFACE.md`. `AGENTS.md`, `AGENT_WORKLOG.md`, and `scripts/` are
+repository-local operational scaffolding; they do not constitute additional
+conceptual specification.
 
 Additional topic files, worked examples, or schemas may be added later if
 external demand justifies them. They are intentionally omitted from the first

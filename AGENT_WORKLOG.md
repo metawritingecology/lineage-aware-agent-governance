@@ -32,3 +32,54 @@ this file are defined in `AGENTS.md`.
 - Risks / assumptions: the governance rules here are adapted, not verbatim
   copies, from the sibling repositories; an independent review is recommended
   before this surface is relied upon or made public.
+
+### 2026-08-15 Symbol hygiene: convert prose != to the not-equal sign
+
+- Agent used: Claude Code (executing agent), on owner instruction. Logged
+  retroactively; this change shipped in commit `3d5d2063` before a worklog entry
+  was written, which the second review correctly flagged.
+- Task performed: converted 38 prose `!=` occurrences in `GOVERNANCE_SURFACE.md`
+  and 1 in `README.md` to the not-equal sign, per the symbol-hygiene rule. The
+  `!=` markers inside `AGENTS.md` and this file that describe the rule itself
+  were left as literals.
+- Files changed: `GOVERNANCE_SURFACE.md`, `README.md`.
+- Checks run: 0 `!=` remaining in either file; strict UTF-8 decode, 0 U+FFFD.
+- Unresolved questions: none for this change.
+- Risks / assumptions: none; a mechanical notation change with no semantic edit.
+
+### 2026-08-15 Second-review remediation
+
+- Agent used: Claude Code (executing agent), on owner instruction, acting on an
+  independent second review of the repository envelope.
+- Task performed: (1) rewrote `NOTICE`, which was a verbatim sibling-repo file
+  that mislabelled this repo as the MWE public corpus, listed four files not
+  present here, and contained a personal name --- all removed; (2) fixed the
+  licensing signal by placing `scripts/` under the MIT License (new
+  `scripts/LICENSE`, SPDX headers) while text/diagrams stay CC BY 4.0, and
+  synchronised `README.md`, `NOTICE`, and the surface's License section;
+  (3) updated the repository-structure descriptions in `README.md` and
+  `GOVERNANCE_SURFACE.md` to list the scaffolding files and separate conceptual
+  surface from scaffolding; (4) fixed two real checker defects --- merged-PR
+  evidence now requires the PR base to be the integration branch and the PR head
+  to equal the current branch tip, and PRs are kept per head branch instead of
+  overwritten; the integration tip and branch inventory now share one ls-remote
+  observation window instead of a possibly-stale `origin/main`; (5) added a
+  mechanical append-only check (the `origin/main` worklog must be an exact byte
+  prefix of the working copy); (6) added a Rule Register, an enforcement-maturity
+  note, a lineage-resolution and unknown-lineage fail-closed rule, a
+  lineage-vs-review-context independence distinction, a live-record
+  dependency-footprint / TOCTOU statement, and a layered route-identity model to
+  `GOVERNANCE_SURFACE.md`; (7) clarified worklog scope in `AGENTS.md`.
+- Files changed: `NOTICE`, `README.md`, `GOVERNANCE_SURFACE.md`, `AGENTS.md`,
+  `AGENT_WORKLOG.md`, `scripts/check-agent-worklog-governance.mjs`, and new
+  `scripts/LICENSE`.
+- Checks run: `node --check` on the checker (syntax OK); the governance check
+  itself run before commit (recorded in the round evidence); final sensitive
+  scan across all files, including the personal-name pattern the first scan
+  missed.
+- Unresolved questions / owner-reserved: flip to public; MWE cross-linking;
+  branch protection and CI enforcement at release; CITATION `url` / `version` /
+  `date-released` and a DOI-time personal-name author.
+- Risks / assumptions: the added conceptual sections and the checker changes are
+  themselves adapted this round and warrant a further independent review before
+  public release.

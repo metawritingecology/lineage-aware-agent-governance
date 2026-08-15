@@ -102,6 +102,26 @@ It is a governance boundary used to prevent multiple interfaces backed
 by the same underlying family from being represented as multiple
 independent confirmations.
 
+### Lineage resolution
+
+"Model or provider family" spans two scales, and real routes create boundary
+cases: the same model served by different providers, the same provider serving
+different model families, fine-tuned or distilled derivatives, aggregators that
+swap the backing model dynamically, a stable model alias whose provider updates
+the version underneath, an open base model hosted by several parties, or a route
+whose lineage simply cannot be determined.
+
+Two rules keep this fail-closed:
+
+-   Resolve lineage at dispatch and record it. A fine-tuned or distilled
+    derivative binds on both its base and its tuner until ruled otherwise.
+-   When lineage cannot be determined, leave it unresolved, and do not let an
+    unresolved lineage increase the effective independent reviewer count:
+
+`Unknown lineage ≠ a new independent lineage`
+
+An unidentifiable route therefore cannot be counted as added independence.
+
 ### Environment (gate, not identity)
 
 The execution context in which a route operates.
@@ -125,6 +145,29 @@ adversarial testing, or fallback execution.
 Role is an authorization attribute attached to a route, not an identity
 dimension. The same interface-and-lineage identity may be authorized for
 different roles at different times without becoming a different route.
+
+### Layered identity
+
+To keep governance identity from being mistaken for a complete runtime endpoint
+key, four layers are distinguished:
+
+``` text
+Governance Route Identity = Interface × Lineage
+Dispatch Instance         = Governance Route Identity × Environment
+Review Equivalence Class  = Lineage
+Authorized Use            = Dispatch Instance × Role
+```
+
+Governance Route Identity is what independence is judged on. A Dispatch Instance
+is the concrete runtime binding: the same Interface × Lineage in two
+environments is one governance identity but two dispatch instances, and those
+instances may differ in credentials, tool access, network boundary, filesystem,
+and disclosure authorization. Review Equivalence Class collapses to lineage
+alone, because that is the level at which two reviews may fail to be
+independent. Authorized Use is a dispatch instance acting in a specific role.
+
+Implementers should not use `Interface × Lineage` as a complete runtime endpoint
+key; that is the Dispatch Instance's responsibility.
 
 ---
 
@@ -177,6 +220,28 @@ dependencies may remain.
 
 The lineage rule therefore establishes a **minimum anti-duplication
 boundary**, not a proof of epistemic independence.
+
+### Lineage independence is not review-context independence
+
+Lineage independence is necessary but not sufficient. A second reviewer of a
+distinct lineage that is shown the first reviewer's full output --- its
+findings, its rejection reasoning, its proposed fixes --- is no longer
+informationally independent: its framing, issue selection, and semantic anchors
+have already been set by the first review.
+
+`Reviewer independence ≠ informational independence`
+
+At least two axes therefore matter:
+
+-   **Lineage independence** --- the reviewers do not share a model lineage.
+-   **Review-context independence** --- the later reviewer is not primed by the
+    earlier reviewer's framing.
+
+A blind pass (a reviewer receiving only the artifact and the criteria, not the
+prior review) preserves review-context independence; a corroboration pass
+(a reviewer shown the prior findings) does not, and should be recorded as such.
+This is a further reason the lineage rule is only a minimum anti-duplication
+boundary: it bounds one axis and leaves the other to be managed explicitly.
 
 ---
 
@@ -498,6 +563,30 @@ Designation as a live operational record must itself remain bounded.
 
 `Live record ≠ unrestricted exception`
 
+### Proving a concurrent update is unrelated
+
+"An unrelated update does not invalidate the earlier read" is only safe if
+"unrelated" can be shown, not assumed. The weak version --- "this field did not
+change, so it is fine" --- fails when a different field changed the meaning of
+the field that was read.
+
+A more complete statement binds the decision to a declared footprint:
+
+`Decision = f(snapshot, dependency footprint)`
+
+Revalidation then targets neither the whole file nor an arbitrary field, but:
+
+-   the relied-upon fields,
+-   plus any declared dependencies of those fields,
+-   plus the snapshot / version identity under which they were read.
+
+If any of those changed between read and use, fail closed; an update entirely
+outside that footprint does not invalidate the read. This is a
+time-of-check-to-time-of-use (TOCTOU) boundary, and stating the footprint
+explicitly is what keeps relied-upon-content verification from degrading into an
+exploitable "the one field I looked at is unchanged" loophole (Review
+Question 8).
+
 ---
 
 ## Reviewer Saturation
@@ -708,6 +797,45 @@ Likewise:
 
 requires more than repeated personal use.
 
+## Rule Register
+
+The taxonomy above is only descriptive until each rule is assigned a state. This
+register does that. It is part of the surface, not a separate specification, and
+the state assignments are themselves open to challenge.
+
+| Rule | State | Scope | Enforcement |
+|---|---|---|---|
+| Executor cannot count as its own independent reviewer | HARD | independent review | procedural |
+| Same lineage across interfaces / machines / sessions is one reviewer | HARD | independent review | procedural |
+| Unknown lineage does not increase independent reviewer count | HARD | independent review | procedural |
+| Lineage independence ≠ review-context independence | HEURISTIC | independent review | procedural |
+| Qualification before cost / capacity optimization | HARD | routing | operator |
+| Price cannot lower task tier, review floor, evidence, protected paths, or owner authority | HARD | routing / authority | operator |
+| Route identity = Interface × Lineage (environment / role are gate / attribute) | HARD | routing identity | procedural |
+| Convergence-movement test before another review cycle | HEURISTIC | review loop | operator |
+| Human escalation is an authority transition, not an agent failure | HEURISTIC | escalation | operator |
+| Model output or exit status is not completion evidence | HARD | evidence | mechanical where evidence exists |
+| Worklog history preserved byte-for-byte (append-only) | HARD | operational record | mechanical (checker byte-prefix vs origin) |
+| Live-record verification binds to snapshot + relied-upon footprint | EXPERIMENTAL | mutable state | implementation-dependent |
+| Candidate to confirmed MWE relation promotion | OWNER | relation / ontology | owner only |
+| Public / private status, naming, top navigation, cross-linking | OWNER | release | owner only |
+
+The state of a rule is not fixed. Movement (for example `EXPERIMENTAL ->
+HEURISTIC` or `HEURISTIC -> HARD`) requires the evidence described above. A rule
+marked HARD but enforced only "procedurally" is not yet the same as one enforced
+by infrastructure.
+
+### Enforcement maturity
+
+Most rules here are currently normative or procedural rather than
+infrastructurally enforced. In this repository the worklog append-only invariant
+is mechanically checked, but the independent-review, relation-promotion, and
+worklog-required rules can still be bypassed by a direct push while the default
+branch is unprotected. A governance surface should say this plainly: at the
+public / release stage, protecting the default branch, routing agent changes
+through pull requests, and running the worklog check in continuous integration
+are what would move these rules from procedural to enforced.
+
 ---
 
 ## Public / Internal Boundary
@@ -819,21 +947,27 @@ the applicable MWE authority process.
 
 ## Repository Structure
 
-This first public version is deliberately a single boundary document, not a
-split specification:
+The conceptual public surface is a single boundary document. The remaining files
+are repository-local operational scaffolding and do not constitute additional
+conceptual specification.
 
 ``` text
 lineage-aware-agent-governance/
 |-- README.md
-|-- GOVERNANCE_SURFACE.md   (this document)
-|-- LICENSE
+|-- GOVERNANCE_SURFACE.md   (this document -- the conceptual surface)
+|-- AGENTS.md               (operational scaffolding: agent-participation rules)
+|-- AGENT_WORKLOG.md        (operational scaffolding: append-only worklog)
+|-- scripts/                (operational scaffolding: worklog governance check)
+|-- LICENSE                 (CC BY 4.0, for text and diagrams)
 |-- NOTICE
 `-- CITATION.cff
 ```
 
-Additional topic files, worked examples, or schemas may be added later if
-external demand justifies them. They are intentionally omitted here so the
-surface reads as one boundary rather than as a toolkit.
+The single conceptual document is deliberate: additional topic files, worked
+examples, or schemas may be added later if external demand justifies them, but
+are omitted here so the surface reads as one boundary rather than as a toolkit.
+The scaffolding files exist so the repository can practise the governance the
+document describes; they are not part of the conceptual specification.
 
 Repository structure does not itself establish conceptual authority or
 maturity.
@@ -915,9 +1049,12 @@ purposes, subject to the license terms.
 
 Attribution does not imply endorsement.
 
-If executable software is later added to the repository, it may be
-released under a separate software-specific license. The applicable
-license should be stated explicitly at the file or repository level.
+The repository already contains executable software --- the worklog governance
+check under `scripts/` --- which is released under the **MIT License** (see
+`scripts/LICENSE`), separate from the CC BY 4.0 that covers the text and
+diagrams. Each script also carries an `SPDX-License-Identifier` header, and
+`NOTICE` records the split. Any further code added later should likewise state
+its license explicitly at the file or directory level.
 
 ---
 

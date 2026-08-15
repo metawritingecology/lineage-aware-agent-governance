@@ -1,26 +1,20 @@
-Meta-Writing Ecology public corpus
-Copyright (c) 2026 Tzu Yuan Huang / Meta-Writing Ecology
+lineage-aware-agent-governance
+Copyright (c) 2026 Meta-Writing Ecology
 
-Default license
----------------
-Unless a file header names a different license, this repository is
-licensed under Creative Commons Attribution 4.0 International
-(CC BY 4.0). The full license text is in LICENSE.
+This repository is a candidate / related public surface with respect to
+Meta-Writing Ecology. It is not a confirmed Meta-Writing Ecology component and
+does not represent the Meta-Writing Ecology corpus, archive, registry, or
+authority layer.
 
-Per-file exceptions
--------------------
-These files carry a more restrictive Creative Commons license in their
-headers. The header governs that file:
+Licensing
+---------
+Text and diagrams --- README.md, GOVERNANCE_SURFACE.md, AGENTS.md,
+AGENT_WORKLOG.md, NOTICE, and CITATION.cff --- are licensed under the Creative
+Commons Attribution 4.0 International License (CC BY 4.0). The full legal code is
+in LICENSE.
 
-  semantic-pressure.md
-      CC BY-ND 4.0
-  ai-induced-semantic-deviation.md
-      CC BY-NC 4.0
-  high-integrity-system-architecture.md
-      CC BY-NC-ND 4.0
-  cultural-curvature-unified-field.md
-      CC BY-NC-ND 4.0
+Source code under scripts/ is licensed under the MIT License. The full text is
+in scripts/LICENSE, and each script also carries an SPDX-License-Identifier
+header.
 
-CITATION.cff currently declares license: CC-BY-4.0 for the repository
-as a dataset. That declaration is the default, not a claim that every
-file is BY.
+Attribution does not imply endorsement.

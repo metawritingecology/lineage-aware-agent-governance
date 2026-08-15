@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Meta-Writing Ecology
 
 import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
@@ -7,6 +9,7 @@ const REVIEW_THRESHOLD_LINES = 4000;
 const HARD_REVIEW_THRESHOLD_LINES = 5000;
 const BOT_BRANCH_PREFIXES = ["dependabot/", "renovate/"];
 const REPOSITORY = "metawritingecology/lineage-aware-agent-governance";
+const INTEGRATION_BRANCH = "main";
 
 const args = process.argv.slice(2);
 if (args.length > 1 || (args.length === 1 && args[0] !== "--json")) {
@@ -39,6 +42,22 @@ function requireGit(gitArgs, message) {
   const result = runGit(gitArgs);
   if (!result.ok) throw new Error(`${message}: ${result.stderr}`);
   return result.stdout;
+}
+
+// Raw bytes of a path at a git revision (no encoding, no trim) for exact
+// byte-prefix comparison. Returns { ok: false } if the revision/path is not
+// available locally (e.g. the tracking ref is absent or predates the file).
+function gitShowBytes(spec) {
+  try {
+    return {
+      ok: true,
+      buf: execFileSync("git", ["-c", "core.longpaths=true", "show", spec], {
+        stdio: ["ignore", "pipe", "pipe"],
+      }),
+    };
+  } catch {
+    return { ok: false, buf: null };
+  }
 }
 
 function splitLines(text) {
@@ -91,7 +110,7 @@ function fetchPrMetadata() {
     const byHead = new Map();
     for (const pr of JSON.parse(result.stdout)) {
       if (!pr.headRefName) continue;
-      byHead.set(pr.headRefName, {
+      const entry = {
         number: pr.number,
         state: pr.state,
         draft: pr.isDraft,
@@ -100,7 +119,12 @@ function fetchPrMetadata() {
         headSha: pr.headRefOid,
         mergedAt: pr.mergedAt || null,
         mergeCommitSha: pr.mergeCommit?.oid || null,
-      });
+      };
+      // Keep ALL PRs per head branch. A branch name can carry more than one PR
+      // over time; overwriting would let a stale merged PR mask the current tip.
+      const list = byHead.get(pr.headRefName) ?? [];
+      list.push(entry);
+      byHead.set(pr.headRefName, list);
     }
     return { available: true, reason: null, detail: null, byHead };
   } catch (error) {
@@ -131,7 +155,7 @@ function containedInMainByAncestry(tipSha, originMainSha) {
   return result.stderr ? "unknown" : false;
 }
 
-function buildBranchEvidence(branch, currentBranch, originMainSha, prMetadata) {
+function buildBranchEvidence(branch, currentBranch, integrationBranch, originMainSha, prMetadata) {
   const contained = containedInMainByAncestry(branch.tipSha, originMainSha);
   const evidence = {
     branchName: branch.name,
@@ -140,12 +164,29 @@ function buildBranchEvidence(branch, currentBranch, originMainSha, prMetadata) {
     current_branch_excluded: branch.name === currentBranch,
   };
 
-  const pr = prMetadata.byHead.get(branch.name);
-  if (pr) {
+  const prs = prMetadata.byHead.get(branch.name) ?? [];
+  if (prs.length > 0) {
+    // A merged PR only clears THIS branch tip when it merged into the intended
+    // integration branch AND its recorded head is exactly the current tip.
+    // Anything weaker -- merged into some other base, or head advanced past the
+    // merged commit -- must not read as "cleared". Weak evidence stays
+    // ambiguous / needs review, matching the append-only governance stance.
+    const prForTip = prs.find((p) => p.headSha === branch.tipSha) ?? null;
+    const mergedIntoIntegration = prs.filter(
+      (p) => (p.state === "MERGED" || !!p.mergedAt) && p.base === integrationBranch,
+    );
+    const mergedCoversTip =
+      prForTip !== null &&
+      (prForTip.state === "MERGED" || !!prForTip.mergedAt) &&
+      prForTip.base === integrationBranch;
     return {
       ...evidence,
-      pr,
-      requires_author_or_pr_review: contained !== true && !(pr.state === "MERGED" || pr.mergedAt),
+      prs,
+      integration_branch: integrationBranch,
+      pr_head_matches_tip: prForTip !== null,
+      merged_into_integration_count: mergedIntoIntegration.length,
+      merged_pr_covers_current_tip: mergedCoversTip,
+      requires_author_or_pr_review: contained !== true && !mergedCoversTip,
     };
   }
 
@@ -161,8 +202,16 @@ function collectEvidence() {
   const repositoryRoot = requireGit(["rev-parse", "--show-toplevel"], "repository root cannot be determined");
   const currentBranch = requireGit(["rev-parse", "--abbrev-ref", "HEAD"], "current branch cannot be determined");
   const currentHead = requireGit(["rev-parse", "HEAD"], "current HEAD cannot be determined");
-  const originMainResult = runGit(["rev-parse", "origin/main"]);
-  const originMainSha = originMainResult.ok ? originMainResult.stdout : null;
+
+  // Branch inventory and integration target must share ONE observation window.
+  // Derive the integration-branch tip from the same ls-remote snapshot used for
+  // the branch list, instead of a possibly-stale origin/<branch> tracking ref.
+  const remoteResult = runGit(["ls-remote", "--heads", "origin"]);
+  const remoteBranches = remoteResult.ok ? parseRemoteBranches(remoteResult.stdout) : [];
+  const integrationRemote = remoteBranches.find((b) => b.name === INTEGRATION_BRANCH) ?? null;
+  const originMainSha = integrationRemote ? integrationRemote.tipSha : null;
+  // Ancestry needs the integration tip object locally; if it is absent,
+  // containedInMainByAncestry returns "unknown" rather than a stale answer.
 
   const worklogPath = `${repositoryRoot}/AGENT_WORKLOG.md`;
   if (!existsSync(worklogPath)) throw new Error("AGENT_WORKLOG.md cannot be read");
@@ -172,12 +221,37 @@ function collectEvidence() {
   const activeNoticeCount = (worklogText.match(/^## Active Log Notice$/gm) ?? []).length;
   const activeNoticePointsToAgents = /## Active Log Notice[\s\S]*?`AGENTS\.md`/.test(worklogText);
 
+  // Append-only invariant, mechanically checked: the AGENT_WORKLOG.md at
+  // origin/<integration branch> must be an exact byte PREFIX of the current
+  // working-tree file. History may only be appended to, never rewritten. The
+  // check is fail-safe: if the base version is not available locally it is
+  // reported as unchecked, never passed silently.
+  const baseWorklog = gitShowBytes(`origin/${INTEGRATION_BRANCH}:AGENT_WORKLOG.md`);
+  let worklogAppendOnly;
+  if (!baseWorklog.ok) {
+    worklogAppendOnly = {
+      checked: false,
+      preserved: null,
+      reason: `origin/${INTEGRATION_BRANCH} AGENT_WORKLOG.md not available locally (ref stale/absent, or first publish)`,
+    };
+  } else {
+    const base = baseWorklog.buf;
+    const preserved =
+      worklogBuffer.byteLength >= base.byteLength &&
+      worklogBuffer.subarray(0, base.byteLength).equals(base);
+    worklogAppendOnly = {
+      checked: true,
+      preserved,
+      baseBytes: base.byteLength,
+      currentBytes: worklogBuffer.byteLength,
+      reason: null,
+    };
+  }
+
   const agentsPath = `${repositoryRoot}/AGENTS.md`;
   const agentsText = existsSync(agentsPath) ? readFileSync(agentsPath, "utf8") : "";
   const agentsCanonicalPointerPresent = agentsText.includes("node scripts/check-agent-worklog-governance.mjs");
 
-  const remoteResult = runGit(["ls-remote", "--heads", "origin"]);
-  const remoteBranches = remoteResult.ok ? parseRemoteBranches(remoteResult.stdout) : [];
   const prMetadata = fetchPrMetadata();
   const dependencyBranches = [];
   const nonBotRemoteBranches = [];
@@ -193,7 +267,7 @@ function collectEvidence() {
       continue;
     }
 
-    const evidence = buildBranchEvidence(branch, currentBranch, originMainSha, prMetadata);
+    const evidence = buildBranchEvidence(branch, currentBranch, INTEGRATION_BRANCH, originMainSha, prMetadata);
     if (BOT_BRANCH_PREFIXES.some((prefix) => branch.name.startsWith(prefix))) {
       dependencyBranches.push(evidence);
     } else {
@@ -205,7 +279,9 @@ function collectEvidence() {
     repositoryRoot,
     currentBranch,
     currentHead,
+    integrationBranch: INTEGRATION_BRANCH,
     originMainSha,
+    originMainObservation: originMainSha ? "ls-remote (same window as branch inventory)" : "unavailable",
     agentWorklog: {
       byteSize: worklogBuffer.byteLength,
       lineCount: splitLines(worklogText).length,
@@ -214,6 +290,7 @@ function collectEvidence() {
       activeLogNoticeCount: activeNoticeCount,
       activeLogNoticeOccursExactlyOnce: activeNoticeCount === 1,
       activeLogNoticePointsToAgents: activeNoticePointsToAgents,
+      appendOnly: worklogAppendOnly,
     },
     agentsCanonicalPointerPresent,
     remoteBranchEvidenceAvailable: remoteResult.ok,
@@ -245,6 +322,13 @@ function printHuman(evidence) {
   console.log(`  Rollover line status: ${evidence.agentWorklog.rolloverLineStatus}`);
   console.log(`  Active Log Notice count: ${evidence.agentWorklog.activeLogNoticeCount}`);
   console.log(`  Active Log Notice points to AGENTS.md: ${evidence.agentWorklog.activeLogNoticePointsToAgents}`);
+  console.log(
+    `  Append-only (origin/${evidence.integrationBranch} is a byte prefix): ${
+      evidence.agentWorklog.appendOnly.checked
+        ? evidence.agentWorklog.appendOnly.preserved
+        : `unchecked (${evidence.agentWorklog.appendOnly.reason})`
+    }`,
+  );
   console.log(`  AGENTS.md script invocation pointer present: ${evidence.agentsCanonicalPointerPresent}`);
   console.log("");
   console.log(`Current branch exclusion: ${evidence.currentBranchExclusion}`);
@@ -267,11 +351,12 @@ function printHuman(evidence) {
   console.log("");
   console.log("Non-bot remote branches:");
   for (const branch of evidence.nonBotRemoteBranches) {
-    const prText = branch.pr
-      ? ` pr=#${branch.pr.number} state=${branch.pr.state} merged_at=${branch.pr.mergedAt ?? "null"}`
-      : branch.pr_state_unavailable
-        ? " pr_state_unavailable"
-        : " pr_metadata_found=false";
+    const prText =
+      branch.prs && branch.prs.length > 0
+        ? ` prs=${branch.prs.length} head_matches_tip=${branch.pr_head_matches_tip} merged_covers_tip=${branch.merged_pr_covers_current_tip}`
+        : branch.pr_state_unavailable
+          ? " pr_state_unavailable"
+          : " pr_metadata_found=false";
     console.log(
       `  - ${branch.branchName} ${branch.tipSha} contained_in_main_by_ancestry=${branch.contained_in_main_by_ancestry}${prText} requires_author_or_pr_review=${branch.requires_author_or_pr_review}`,
     );
@@ -289,6 +374,11 @@ try {
   }
   if (!evidence.agentsCanonicalPointerPresent) {
     errors.push("AGENTS.md script invocation pointer is absent");
+  }
+  if (evidence.agentWorklog.appendOnly.checked && evidence.agentWorklog.appendOnly.preserved === false) {
+    errors.push(
+      `AGENT_WORKLOG.md is not append-only: origin/${evidence.integrationBranch} is not a byte prefix of the current file`,
+    );
   }
 
   if (jsonMode) {

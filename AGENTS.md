@@ -119,7 +119,12 @@ explicitly approved.
 
 ## Required Worklog
 
-After any change, update `AGENT_WORKLOG.md` with:
+This requirement covers every **agent-participated** change to the repository
+(a change an agent made or assisted). A purely manual, owner-only change is
+outside agent-worklog scope, though the owner may still record one. When in
+doubt, treat the change as agent-participated and log it.
+
+After any agent-participated change, update `AGENT_WORKLOG.md` with:
 
 - agent used
 - task performed
@@ -181,8 +186,10 @@ worklogs are immutable historical evidence. `AGENT_WORKLOG.md` remains the
 current append target after rollover.
 
 When available, run `node scripts/check-agent-worklog-governance.mjs` as
-read-only validation evidence. Its output does not determine author status,
-merge readiness, integration priority, or authorization.
+read-only validation evidence. Among other checks it verifies the append-only
+invariant mechanically, by confirming that the `origin/main` version of this
+file is an exact byte prefix of the working copy. Its output does not determine
+author status, merge readiness, integration priority, or authorization.
 
 The user remains final authority for public release, naming, classification,
 relation confirmation, top navigation, cross-linking, and merge / publication

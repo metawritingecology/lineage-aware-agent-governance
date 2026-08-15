@@ -29,7 +29,7 @@ It is not a production-ready orchestration system, an enterprise governance
 product, a compliance framework, a security architecture, a benchmark, or a
 deterministic policy engine. The public surface is intentionally incomplete.
 
-`Public visibility != operational completeness`
+`Public visibility ≠ operational completeness`
 
 ## Core distinction
 

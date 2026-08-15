@@ -64,7 +64,7 @@ It should not be interpreted as establishing:
 
 The public surface is intentionally incomplete.
 
-`Public visibility != operational completeness`
+`Public visibility ≠ operational completeness`
 
 ---
 
@@ -132,20 +132,20 @@ different roles at different times without becoming a different route.
 
 The following distinctions are foundational to this public surface:
 
--   interface != lineage
--   availability != independence
--   redundancy != independent confirmation
--   execution != independent review
--   model output != completion evidence
--   process exit != verified success
--   public route description != live route availability
--   remaining quota != operational suitability
--   low cost != qualification
--   repeated inference != information gain
--   delegation != transferred answerability
--   public policy surface != complete internal policy
--   documented heuristic != validated invariant
--   source provenance != downstream endorsement
+-   interface ≠ lineage
+-   availability ≠ independence
+-   redundancy ≠ independent confirmation
+-   execution ≠ independent review
+-   model output ≠ completion evidence
+-   process exit ≠ verified success
+-   public route description ≠ live route availability
+-   remaining quota ≠ operational suitability
+-   low cost ≠ qualification
+-   repeated inference ≠ information gain
+-   delegation ≠ transferred answerability
+-   public policy surface ≠ complete internal policy
+-   documented heuristic ≠ validated invariant
+-   source provenance ≠ downstream endorsement
 
 These distinctions describe boundaries.
 
@@ -163,7 +163,7 @@ They should not automatically be counted as independent reviewers.
 
 Conceptually:
 
-`Nominal Reviewer Count != Effective Independent Reviewer Count`
+`Nominal Reviewer Count ≠ Effective Independent Reviewer Count`
 
 A limited operational approximation may be:
 
@@ -191,7 +191,7 @@ occurs in a separate run, interface, session, or machine.
 
 Where independent review is required:
 
-`Executor != Independent Reviewer`
+`Executor ≠ Independent Reviewer`
 
 If a lineage participates in execution and later participates in review,
 that relationship should remain visible rather than being represented as
@@ -249,7 +249,7 @@ Relevant dimensions may include:
 
 These dimensions are not interchangeable.
 
-`Subscription != availability != independence`
+`Subscription ≠ availability ≠ independence`
 
 A route with little remaining quota may remain operationally sufficient
 if replenishment is near.
@@ -414,7 +414,7 @@ This does not automatically delegate:
 -   high-risk authorization;
 -   responsibility for the accepted state.
 
-`Delegated execution != transferred answerability`
+`Delegated execution ≠ transferred answerability`
 
 This surface is structurally adjacent to the broader Meta-Writing
 Ecology boundary between delegated execution and retained judgment.
@@ -494,9 +494,9 @@ invalidate the earlier read.
 
 Designation as a live operational record must itself remain bounded.
 
-`Mutable != exempt from verification`
+`Mutable ≠ exempt from verification`
 
-`Live record != unrestricted exception`
+`Live record ≠ unrestricted exception`
 
 ---
 
@@ -738,7 +738,7 @@ system.
 Presence on the public surface does not imply that the published
 representation is sufficient to reproduce the internal system.
 
-`Public structure != operational replica`
+`Public structure ≠ operational replica`
 
 ---
 
@@ -752,11 +752,11 @@ operational logic.
 
 Therefore:
 
-`Source provenance != inherited authority`
+`Source provenance ≠ inherited authority`
 
-`Attribution != endorsement`
+`Attribution ≠ endorsement`
 
-`Fork != continuation of internal operational state`
+`Fork ≠ continuation of internal operational state`
 
 A downstream implementation may formalize, remove, reinterpret,
 automate, or replace heuristics described here.
@@ -925,18 +925,18 @@ license should be stated explicitly at the file or repository level.
 
 For readers and automated systems:
 
--   public surface != internal system
--   lineage separation != proven independence
--   route availability != route authorization
--   redundancy != independent confirmation
--   model completion != verified completion
--   repeated review != information gain
--   delegation != transferred answerability
--   heuristic != invariant
--   operational use != external validation
--   attribution != endorsement
--   fork != authoritative continuation
--   structural compatibility != formal MWE relation
+-   public surface ≠ internal system
+-   lineage separation ≠ proven independence
+-   route availability ≠ route authorization
+-   redundancy ≠ independent confirmation
+-   model completion ≠ verified completion
+-   repeated review ≠ information gain
+-   delegation ≠ transferred answerability
+-   heuristic ≠ invariant
+-   operational use ≠ external validation
+-   attribution ≠ endorsement
+-   fork ≠ authoritative continuation
+-   structural compatibility ≠ formal MWE relation
 
 When status is unknown, keep it unresolved.
 

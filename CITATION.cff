@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you reference this surface, please cite it as below."
+title: "Lineage-Aware Multi-Agent Governance Surface"
+abstract: >-
+  A selected public structural account of routing, review independence,
+  capacity, evidence, convergence, and retained human authority observed in a
+  high-intensity multi-agent working environment. Operator-derived,
+  operationally exercised, externally unvalidated. Candidate / related surface
+  with respect to Meta-Writing Ecology; not a confirmed component.
+type: dataset
+license: CC-BY-4.0
+authors:
+  - name: "Meta-Writing Ecology"
+# Publish-time fields (set when repo location and release date are fixed):
+# repository-code: "https://github.com/metawritingecology/lineage-aware-agent-governance"
+# url: "https://metawritingecology.org/"
+# version: "0.1.0-draft"
+# date-released: "YYYY-MM-DD"
+keywords:
+  - multi-agent
+  - governance
+  - review-independence
+  - routing
+  - retained-authority
+  - meta-writing-ecology

@@ -83,3 +83,43 @@ this file are defined in `AGENTS.md`.
 - Risks / assumptions: the added conceptual sections and the checker changes are
   themselves adapted this round and warrant a further independent review before
   public release.
+
+### 2026-08-15 Third-review remediation
+
+- Agent used: Claude Code (executing agent), on owner instruction.
+- Reviewer: independent third review, delivered as pasted findings by the owner.
+- Reviewer lineage: unknown (not disclosed to the executing agent).
+- Review mode: sequential (review of the pushed HEAD, not a parallel blind pass).
+- Reviewed commit: `a992f71c`.
+- Review evidence / reference: `versions\20260815-2300-review3-remediation\`
+  (this round's evidence); the dispatched brief was
+  `versions\20260815-2220-review3-brief\REVIEW3-BRIEF.md`.
+- Task performed: (1) resolved the Route Identity vs Review Equivalence
+  inconsistency introduced last round --- route identity now identifies the
+  route while the lineage relation, not identity, gates reviewer independence,
+  and "Review Equivalence Class = Lineage" was replaced with a Review
+  Independence Gate stated as a non-transitive dependency predicate;
+  (2) downgraded the panel formula to a Lineage-Distinct Review Panel with the
+  Effective Independent Review Panel as a subset; (3) refined the blind-pass
+  claim to direct-exposure prevention only and distinguished parallel from
+  sequential blind review; (4) added an unknown-dependency fail-closed clause and
+  a footprint-completeness requirement to the live-record section; (5) checker:
+  append-only now binds to the observed integration-commit SHA (read-only fetch
+  if absent) and fails closed when indeterminate, and ancestry now reads the
+  merge-base exit code directly; (6) added `.gitattributes` pinning LF so the
+  byte-prefix invariant does not depend on autocrlf; (7) added optional
+  independent-review evidence fields to `AGENTS.md`; (8) minor: Status changed to
+  "Independent Review" and the Fork/Derivative license sentence made
+  mixed-license.
+- Files changed: `GOVERNANCE_SURFACE.md`, `README.md`, `AGENTS.md`,
+  `AGENT_WORKLOG.md`, `scripts/check-agent-worklog-governance.mjs`, and new
+  `.gitattributes`.
+- Checks run: `node --check` (syntax OK); the governance check run before commit;
+  full recursive sensitive scan; strict UTF-8, 0 U+FFFD.
+- Unresolved questions / owner-reserved: unchanged --- flip public, MWE
+  cross-linking, branch protection and CI at release, CITATION
+  url / version / date-released and a DOI-time personal-name author.
+- Risks / assumptions: the reframings in points 1 to 4 change how the core model
+  is stated; they restore internal consistency rather than add new claims, but
+  warrant a further independent (ideally parallel blind) review before public
+  release.

@@ -1,6 +1,6 @@
 # Lineage-Aware Multi-Agent Governance Surface
 
--   **Status:** Public Draft / Pre-Review
+-   **Status:** Public Draft / Independent Review
 -   **Document type:** Operational boundary surface
 -   **Context:** Meta-Writing Ecology --- candidate / related public
     surface, not a confirmed MWE component
@@ -79,9 +79,12 @@ These two dimensions should not be collapsed into one identifier.
 Other properties --- such as the execution environment a route runs in,
 or the role it is authorized to perform --- are treated as gates and
 attributes layered on top of this identity, not as additional identity
-dimensions. This separation is deliberate: identity determines
-independence, while gates and attributes determine dispatchability. The
-two must not be conflated.
+dimensions. This separation is deliberate: route identity *identifies the
+route*, while the lineage relation between routes governs reviewer
+anti-duplication, and gates and attributes determine dispatchability.
+Route identity is not by itself the independence test --- two routes with
+different identities can still fail to be independent because they share a
+lineage. The three must not be conflated.
 
 ### Interface
 
@@ -153,21 +156,37 @@ key, four layers are distinguished:
 
 ``` text
 Governance Route Identity = Interface × Lineage
-Dispatch Instance         = Governance Route Identity × Environment
-Review Equivalence Class  = Lineage
+Dispatch Instance         = Route Identity × Environment
+Review Independence Gate  = lineage relation between routes
 Authorized Use            = Dispatch Instance × Role
 ```
 
-Governance Route Identity is what independence is judged on. A Dispatch Instance
-is the concrete runtime binding: the same Interface × Lineage in two
-environments is one governance identity but two dispatch instances, and those
-instances may differ in credentials, tool access, network boundary, filesystem,
-and disclosure authorization. Review Equivalence Class collapses to lineage
-alone, because that is the level at which two reviews may fail to be
-independent. Authorized Use is a dispatch instance acting in a specific role.
+Route Identity identifies the route; it is not by itself the independence test.
+Two routes with different identities --- for example `Browser × GPT` and
+`API × GPT` --- are two route identities but not two independent reviewers,
+because they share a lineage. A Dispatch Instance is the concrete runtime
+binding: the same Interface × Lineage in two environments is one route identity
+but two dispatch instances, which may differ in credentials, tool access,
+network boundary, filesystem, and disclosure authorization. The Review
+Independence Gate is not a property of a single route but a *relation between*
+routes, evaluated on lineage. Authorized Use is a dispatch instance acting in a
+specific role.
 
 Implementers should not use `Interface × Lineage` as a complete runtime endpoint
 key; that is the Dispatch Instance's responsibility.
+
+The independence gate is a relation, not a partition, and this matters once
+derivatives exist. A fine-tuned or distilled model binds on both its base and
+its tuner, so with `A = Base-X + Tuner-P`, `B = Base-X + Tuner-Q`, and
+`C = Base-Y + Tuner-P`, `A` shares a base with `B` and a tuner with `C`, while
+`B` and `C` share nothing directly. The dependency relation is therefore not
+transitive, so lineage does not cleanly partition reviewers into disjoint
+equivalence classes. State the gate as a predicate rather than a class:
+
+`Independent(A, B) only if no disqualifying lineage dependency is known between A and B`
+
+Unknown dependencies fail closed, exactly as an unknown lineage does: absence of
+*known* shared lineage is not proof of independence.
 
 ---
 
@@ -208,11 +227,17 @@ Conceptually:
 
 `Nominal Reviewer Count ≠ Effective Independent Reviewer Count`
 
-A limited operational approximation may be:
+A limited operational approximation counts only lineage distinctness:
 
-`Effective Review Panel = Distinct Qualified Lineages Represented`
+`Lineage-Distinct Review Panel = Distinct Qualified Lineages Represented`
 
-This is not a claim that distinct lineages are truly independent.
+This is not the effective independent panel; it is only an upper bound on it:
+
+`Effective Independent Review Panel ⊆ Lineage-Distinct Review Panel`
+
+because a lineage-distinct reviewer that runs a corroboration pass rather than a
+blind pass adds no review-context independence (see below). Distinct lineages
+are, in any case, not a claim of true independence.
 
 Shared training data, architectural convergence, benchmark optimization,
 common information sources, correlated failure modes, or other
@@ -238,10 +263,19 @@ At least two axes therefore matter:
     earlier reviewer's framing.
 
 A blind pass (a reviewer receiving only the artifact and the criteria, not the
-prior review) preserves review-context independence; a corroboration pass
-(a reviewer shown the prior findings) does not, and should be recorded as such.
-This is a further reason the lineage rule is only a minimum anti-duplication
-boundary: it bounds one axis and leaves the other to be managed explicitly.
+prior review) prevents *direct* exposure to the prior review's framing; a
+corroboration pass (a reviewer shown the prior findings) does not, and should be
+recorded as such. But a blind pass does not by itself guarantee informational
+independence: in a *sequential* review the earlier reviewer's influence can
+still reach the later one indirectly --- through an artifact that was revised in
+response to it, or through acceptance criteria that were changed because of it.
+
+The stricter, genuinely context-independent case is a *parallel blind review*:
+the same artifact snapshot, the same criteria snapshot, no prior-review output,
+and passes run in parallel. Sequential blind review is a weaker, distinct
+category and should be labelled as such. This is a further reason the lineage
+rule is only a minimum anti-duplication boundary: it bounds one axis and leaves
+the other to be managed explicitly.
 
 ---
 
@@ -587,6 +621,18 @@ explicitly is what keeps relied-upon-content verification from degrading into an
 exploitable "the one field I looked at is unchanged" loophole (Review
 Question 8).
 
+This is only safe if the footprint is complete. The dangerous case is not the
+declared dependency but the *undeclared* one, and it fails closed the same way
+an unknown lineage does:
+
+`Unknown dependency ≠ unrelated dependency`
+
+If the completeness of the dependency footprint cannot be established, broaden
+the verification boundary or fail closed. "Outside the footprint" may be treated
+as unrelated only when the footprint is known to be complete; otherwise an
+apparently unrelated change may have altered the meaning of a relied-upon field
+through a dependency that was never declared.
+
 ---
 
 ## Reviewer Saturation
@@ -815,7 +861,7 @@ the state assignments are themselves open to challenge.
 | Convergence-movement test before another review cycle | HEURISTIC | review loop | operator |
 | Human escalation is an authority transition, not an agent failure | HEURISTIC | escalation | operator |
 | Model output or exit status is not completion evidence | HARD | evidence | mechanical where evidence exists |
-| Worklog history preserved byte-for-byte (append-only) | HARD | operational record | mechanical (checker byte-prefix vs origin) |
+| Worklog history preserved byte-for-byte (append-only) | HARD | operational record | mechanical (checker byte-prefix vs the observed integration commit; fail-closed when unverifiable) |
 | Live-record verification binds to snapshot + relied-upon footprint | EXPERIMENTAL | mutable state | implementation-dependent |
 | Candidate to confirmed MWE relation promotion | OWNER | relation / ontology | owner only |
 | Public / private status, naming, top navigation, cross-linking | OWNER | release | owner only |
@@ -873,7 +919,9 @@ representation is sufficient to reproduce the internal system.
 ## Fork / Derivative Boundary
 
 Forking, adaptation, testing, redistribution, and commercial reuse are
-permitted under the applicable CC BY 4.0 license, subject to its terms.
+permitted under the applicable licenses, subject to their terms: the textual and
+diagrammatic surface under CC BY 4.0, and the executable scaffolding under its
+stated software license (MIT).
 
 A derivative may preserve source provenance while developing different
 operational logic.

@@ -133,6 +133,19 @@ After any agent-participated change, update `AGENT_WORKLOG.md` with:
 - unresolved questions
 - risks or assumptions
 
+For boundary-sensitive work that relied on an independent review, also record
+the review so it is evidenced rather than merely asserted:
+
+- reviewer (which reviewer / interface)
+- reviewer lineage
+- review mode (parallel blind, sequential blind, or corroboration)
+- reviewed commit or snapshot
+- review evidence / reference
+
+Ordinary mechanical tasks do not need these extra fields. Where a field cannot
+be established (for example a reviewer lineage that was not disclosed to the
+executing agent), record it as unknown rather than omitting it.
+
 ## Worklog Governance
 
 `AGENT_WORKLOG.md` is the single active append target for agent worklog entries.

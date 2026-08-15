@@ -4,7 +4,7 @@ A selected, public structural account of how routing, review independence,
 capacity, evidence, convergence, and retained human authority were handled in a
 high-intensity multi-agent working environment.
 
-- **Status:** Public Draft / Pre-Review
+- **Status:** Public Draft / Independent Review
 - **Maturity:** Operator-derived, operationally exercised, externally unvalidated
 - **Relation to Meta-Writing Ecology:** Candidate / related surface — compatible
   with MWE concerns but **not** a confirmed MWE component. Any formal relation

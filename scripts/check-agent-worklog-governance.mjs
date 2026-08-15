@@ -60,6 +60,36 @@ function gitShowBytes(spec) {
   }
 }
 
+function gitObjectExists(spec) {
+  return (
+    spawnSync("git", ["-c", "core.longpaths=true", "cat-file", "-e", spec], {
+      stdio: ["ignore", "pipe", "pipe"],
+    }).status === 0
+  );
+}
+
+// Bytes of AGENT_WORKLOG.md at a specific commit, fetching that commit
+// read-only (objects only, no ref or working-tree change) if it is not present
+// locally. Distinguishes:
+//   found         - blob obtained (compare it as the append-only base)
+//   path_absent   - commit present but the file did not exist there (bootstrap)
+//   indeterminate - commit could not be resolved even after a read-only fetch
+function worklogBaseAt(sha) {
+  let blob = gitShowBytes(`${sha}:AGENT_WORKLOG.md`);
+  if (blob.ok) return { state: "found", buf: blob.buf };
+  if (gitObjectExists(`${sha}^{commit}`)) return { state: "path_absent" };
+  const fetched =
+    spawnSync("git", ["-c", "core.longpaths=true", "fetch", "--quiet", "--no-tags", "origin", sha], {
+      stdio: ["ignore", "pipe", "pipe"],
+    }).status === 0;
+  if (fetched) {
+    blob = gitShowBytes(`${sha}:AGENT_WORKLOG.md`);
+    if (blob.ok) return { state: "found", buf: blob.buf };
+    if (gitObjectExists(`${sha}^{commit}`)) return { state: "path_absent" };
+  }
+  return { state: "indeterminate" };
+}
+
 function splitLines(text) {
   if (text.length === 0) return [];
   return text.split(/\r\n|\n|\r/);
@@ -150,9 +180,16 @@ function isCurrentBranch(branchName, currentBranch) {
 
 function containedInMainByAncestry(tipSha, originMainSha) {
   if (!originMainSha) return "unknown";
-  const result = runGit(["merge-base", "--is-ancestor", tipSha, originMainSha]);
-  if (result.ok) return true;
-  return result.stderr ? "unknown" : false;
+  // Read the exit CODE directly: `git merge-base --is-ancestor` exits 0 for
+  // ancestor and 1 for "not an ancestor" (a normal result, not an error).
+  // Routing exit 1 through a throwing execFileSync would collapse it to
+  // "unknown"; spawnSync exposes the status so a real negative is reported.
+  const res = spawnSync("git", ["-c", "core.longpaths=true", "merge-base", "--is-ancestor", tipSha, originMainSha], {
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  if (res.status === 0) return true;
+  if (res.status === 1) return false;
+  return "unknown";
 }
 
 function buildBranchEvidence(branch, currentBranch, integrationBranch, originMainSha, prMetadata) {
@@ -221,31 +258,53 @@ function collectEvidence() {
   const activeNoticeCount = (worklogText.match(/^## Active Log Notice$/gm) ?? []).length;
   const activeNoticePointsToAgents = /## Active Log Notice[\s\S]*?`AGENTS\.md`/.test(worklogText);
 
-  // Append-only invariant, mechanically checked: the AGENT_WORKLOG.md at
-  // origin/<integration branch> must be an exact byte PREFIX of the current
-  // working-tree file. History may only be appended to, never rewritten. The
-  // check is fail-safe: if the base version is not available locally it is
-  // reported as unchecked, never passed silently.
-  const baseWorklog = gitShowBytes(`origin/${INTEGRATION_BRANCH}:AGENT_WORKLOG.md`);
+  // Append-only invariant (HARD), fail-closed. Bind to the OBSERVED integration
+  // tip from the same ls-remote window as the branch inventory -- not the local
+  // origin/<branch> tracking ref, which can be stale and would let a rewrite of
+  // history newer than the stale ref pass unseen. The worklog at that commit
+  // must be an exact byte PREFIX of the working-tree file. If the commit cannot
+  // be resolved even after a read-only fetch, the invariant is INDETERMINATE and
+  // fails closed rather than passing green.
   let worklogAppendOnly;
-  if (!baseWorklog.ok) {
+  if (originMainSha === null) {
     worklogAppendOnly = {
       checked: false,
       preserved: null,
-      reason: `origin/${INTEGRATION_BRANCH} AGENT_WORKLOG.md not available locally (ref stale/absent, or first publish)`,
+      indeterminate: false,
+      reason: "no remote integration branch observed (bootstrap / pre-first-push)",
     };
   } else {
-    const base = baseWorklog.buf;
-    const preserved =
-      worklogBuffer.byteLength >= base.byteLength &&
-      worklogBuffer.subarray(0, base.byteLength).equals(base);
-    worklogAppendOnly = {
-      checked: true,
-      preserved,
-      baseBytes: base.byteLength,
-      currentBytes: worklogBuffer.byteLength,
-      reason: null,
-    };
+    const base = worklogBaseAt(originMainSha);
+    if (base.state === "found") {
+      const preserved =
+        worklogBuffer.byteLength >= base.buf.byteLength &&
+        worklogBuffer.subarray(0, base.buf.byteLength).equals(base.buf);
+      worklogAppendOnly = {
+        checked: true,
+        preserved,
+        indeterminate: false,
+        baseSha: originMainSha,
+        baseBytes: base.buf.byteLength,
+        currentBytes: worklogBuffer.byteLength,
+        reason: null,
+      };
+    } else if (base.state === "path_absent") {
+      worklogAppendOnly = {
+        checked: false,
+        preserved: null,
+        indeterminate: false,
+        baseSha: originMainSha,
+        reason: "AGENT_WORKLOG.md not present at the observed integration commit (bootstrap)",
+      };
+    } else {
+      worklogAppendOnly = {
+        checked: false,
+        preserved: null,
+        indeterminate: true,
+        baseSha: originMainSha,
+        reason: "observed integration commit unavailable locally and could not be fetched -- append-only unverifiable",
+      };
+    }
   }
 
   const agentsPath = `${repositoryRoot}/AGENTS.md`;
@@ -322,11 +381,14 @@ function printHuman(evidence) {
   console.log(`  Rollover line status: ${evidence.agentWorklog.rolloverLineStatus}`);
   console.log(`  Active Log Notice count: ${evidence.agentWorklog.activeLogNoticeCount}`);
   console.log(`  Active Log Notice points to AGENTS.md: ${evidence.agentWorklog.activeLogNoticePointsToAgents}`);
+  const ao = evidence.agentWorklog.appendOnly;
   console.log(
-    `  Append-only (origin/${evidence.integrationBranch} is a byte prefix): ${
-      evidence.agentWorklog.appendOnly.checked
-        ? evidence.agentWorklog.appendOnly.preserved
-        : `unchecked (${evidence.agentWorklog.appendOnly.reason})`
+    `  Append-only (byte prefix at observed integration commit${ao.baseSha ? " " + ao.baseSha.slice(0, 8) : ""}): ${
+      ao.checked
+        ? ao.preserved
+        : ao.indeterminate
+          ? `INDETERMINATE -- fail-closed (${ao.reason})`
+          : `not-applicable (${ao.reason})`
     }`,
   );
   console.log(`  AGENTS.md script invocation pointer present: ${evidence.agentsCanonicalPointerPresent}`);
@@ -375,9 +437,14 @@ try {
   if (!evidence.agentsCanonicalPointerPresent) {
     errors.push("AGENTS.md script invocation pointer is absent");
   }
-  if (evidence.agentWorklog.appendOnly.checked && evidence.agentWorklog.appendOnly.preserved === false) {
+  if (evidence.agentWorklog.appendOnly.preserved === false) {
     errors.push(
-      `AGENT_WORKLOG.md is not append-only: origin/${evidence.integrationBranch} is not a byte prefix of the current file`,
+      "AGENT_WORKLOG.md is not append-only: the observed integration-commit worklog is not a byte prefix of the current file",
+    );
+  }
+  if (evidence.agentWorklog.appendOnly.indeterminate) {
+    errors.push(
+      "AGENT_WORKLOG.md append-only invariant is unverifiable (observed integration commit unavailable) -- failing closed",
     );
   }
 

@@ -1,0 +1,8 @@
+# Normalize line endings so the byte-for-byte worklog append-only invariant
+# does not depend on any machine's core.autocrlf / checkout configuration.
+* text=auto eol=lf
+AGENT_WORKLOG.md text eol=lf
+*.md  text eol=lf
+*.mjs text eol=lf
+LICENSE text eol=lf
+NOTICE  text eol=lf

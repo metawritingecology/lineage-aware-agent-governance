@@ -9,6 +9,7 @@ high-intensity multi-agent working environment.
 - **Relation to Meta-Writing Ecology:** Candidate / related surface — compatible
   with MWE concerns but **not** a confirmed MWE component. Any formal relation
   must be established separately through the applicable MWE authority process.
+  Canonical MWE public orientation: <https://metawritingecology.org/>
 - **License:** [CC BY 4.0](LICENSE) for text and diagrams; source code under
   `scripts/` is under the [MIT License](scripts/LICENSE). Attribution does not
   imply endorsement.

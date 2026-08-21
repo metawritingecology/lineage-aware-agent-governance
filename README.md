@@ -76,3 +76,17 @@ conceptual specification.
 Additional topic files, worked examples, or schemas may be added later if
 external demand justifies them. They are intentionally omitted from the first
 version to keep the surface readable as one boundary.
+
+## Possible relations (not asserted)
+
+This surface emerged from one operating practice in parallel with other
+candidate surfaces: lineage-admission-control, disclosure-order-review,
+falsifiability-first-protocol, claim-strength-profile, scoped-rejection.
+Common origin is the only relation asserted. Composition, dependency, or a
+unified framework among any of them is possible and deliberately NOT
+asserted; no confirmed relation exists, and none should be inferred from
+co-ownership, shared vocabulary, or structural resemblance. Read under a
+weakest-compatible-relation default: navigation adjacency. If a
+composition is ever established it will be stated explicitly; absence of
+that statement means it has not been. This note is repository scaffolding;
+it adds nothing to, and changes nothing in, GOVERNANCE_SURFACE.md.

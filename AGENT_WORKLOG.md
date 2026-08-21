@@ -164,3 +164,10 @@ this file are defined in `AGENTS.md`.
   independently reviewed; its corrections were mechanical rather than
   conceptual. This edit is a single line and carries no test asserting that the
   boundary wording stays attached to the URL.
+
+## 2026-08-21 - README scaffolding addition: possible-relations note
+
+- Added a "Possible relations (not asserted)" section to README.md by
+  owner instruction, listing sibling candidate surfaces under a
+  weakest-compatible-relation default. GOVERNANCE_SURFACE.md untouched
+  (byte-identical); this is scaffolding, not conceptual specification.

@@ -82,7 +82,8 @@ version to keep the surface readable as one boundary.
 This surface emerged from one operating practice in parallel with other
 candidate surfaces: lineage-admission-control, disclosure-order-review,
 falsifiability-first-protocol, claim-strength-profile, scoped-rejection.
-Common origin is the only relation asserted. Composition, dependency, or a
+Common origin is asserted as a fact of production history; no relation
+BEYOND common origin is asserted, and none is confirmed. Composition, dependency, or a
 unified framework among any of them is possible and deliberately NOT
 asserted; no confirmed relation exists, and none should be inferred from
 co-ownership, shared vocabulary, or structural resemblance. Read under a

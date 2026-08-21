@@ -123,3 +123,44 @@ this file are defined in `AGENTS.md`.
   is stated; they restore internal consistency rather than add new claims, but
   warrant a further independent (ideally parallel blind) review before public
   release.
+
+## 2026-08-17 --- canonical MWE public-orientation backlink
+
+- Agent used: Claude Code (Opus), PC.
+- Task performed: added one line to the existing
+  `Relation to Meta-Writing Ecology` bullet in `README.md`, giving the canonical
+  Meta-Writing Ecology public orientation URL. This is the reciprocal half of a
+  cross-link; the two sibling repositories gain a link to this one in separate
+  pull requests of their own.
+- Why one line and not a new section: the README already carries a correct and
+  public candidate-status relation statement. A separate "Related Public
+  Context" section would have repeated the same disclaimer twice in one file, so
+  the existing bullet was extended instead. The relation wording itself is
+  unchanged, byte for byte.
+- The URL is the apex HTTPS origin, no `www`. That is the origin the site itself
+  declares as its approved production origin
+  (`src/lib/publicMetadata.ts`, `APPROVED_PRODUCTION_ORIGIN`), and no `www`
+  variant occurs anywhere in the site's `src/`, `public/`, or `scripts/`.
+- Files changed: `README.md` (one line added, zero deleted),
+  `AGENT_WORKLOG.md` (this entry).
+- Checks run: pre-append inventory gate before this write ---
+  `node scripts/check-agent-worklog-governance.mjs` exit 0, append-only byte
+  prefix true at the observed integration commit `cf59994c`, 1 Active Log Notice
+  pointing at `AGENTS.md`, rollover `below_review_threshold`, no non-bot remote
+  branches other than `main`, no open pull requests. Gate does not stop. Symbol
+  hygiene: 0 literal `!=` in the added line. Strict UTF-8, 0 U+FFFD.
+- Relation status: unchanged. This repository remains a **candidate / related**
+  public surface and is **not** a confirmed Meta-Writing Ecology component.
+  Publishing a backlink does not establish Registry status, formal dependency,
+  ontology, component membership, or a confirmed conceptual relation. Promotion
+  from candidate to confirmed is owner-reserved and was not performed.
+- Unresolved questions / owner-reserved: unchanged --- branch protection and CI
+  at release, CITATION `url` / `version` / `date-released` and a DOI-time
+  personal-name author. `flip public` is now resolved: the repository is public.
+  Merge of this pull request is an owner decision and is not taken here.
+- Risks / assumptions: the plan behind this change received one independent
+  review (distinct lineage, `ACCEPT_WITH_FINDINGS`, findings adjudicated before
+  execution). The corrected plan that this change implements was NOT itself
+  independently reviewed; its corrections were mechanical rather than
+  conceptual. This edit is a single line and carries no test asserting that the
+  boundary wording stays attached to the URL.

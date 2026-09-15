@@ -188,6 +188,36 @@ equivalence classes. State the gate as a predicate rather than a class:
 Unknown dependencies fail closed, exactly as an unknown lineage does: absence of
 *known* shared lineage is not proof of independence.
 
+## Execution authority, lifecycle, and observation boundary
+
+This repository remains a selected structural projection of lineage-aware agent governance, intentionally incomplete and candidate / related to Meta-Writing Ecology (MWE), not a confirmed MWE component. The following describes accepted architectural boundaries; it is not a full production specification or a claim of production readiness.
+
+### Governance authority
+
+Supervisor is the sole execution-governance authority. It decides assignments, routes, bounded worker context, concurrency, review admission, rework, acceptance, and stopping within the applicable policy and human authorization. Human retained authority remains: people set authorization and constraints, retain reserved decisions, and resolve applicable authority conflicts. An unresolved conflict requires a stop and human clarification.
+
+Routing, capacity, credential, and execution-boundary systems are subordinate capabilities or evidence sources. They supply eligibility information, observations, or boundary enforcement; they do not independently assign work, select routes, admit review, accept results, order rework, or decide when a task should stop. Enforcing a boundary does not confer governance authority, and Supervisor judgment does not make a failed boundary pass.
+
+The route model remains Route = Interface × Lineage. Supervisor authority describes who decides; the route model describes the route being considered. Lineage gates reviewer independence, and qualification precedes optimization. Access through a different interface does not by itself establish an independent lineage.
+
+### Enforced lifecycle
+
+Managed Dispatch is the accepted execution mode. Workers act within bounded assignments, with one writer per candidate and bounded execution and review rounds. A candidate is frozen for review so that review applies to an identified, stable body of work. Independent review requires lineage independence from the candidate's author chain; changing interfaces alone does not satisfy that requirement. Lineage independence is a necessary gate, distinct from review-context independence.
+
+A blocking finding requires rework, repair, successful candidate refreeze, and return to review before verification. Review and verification must address the current frozen candidate. Execution and review limits remain binding across continuation; reaching a limit blocks further dispatch rather than silently starting a fresh allowance.
+
+COMPLETE means that the requested outcome is usable, explicit acceptance requirements are satisfied, and no known material blocker prevents intended use. Completion ≠ perfection. ACCEPT requires COMPLETE with no unresolved blocking finding; acceptance then converges on STOP. Once COMPLETE, stop. Further work requires a concrete present failure or regression, or an explicit requirement from the retained human authority or Supervisor.
+
+Review tests the stated acceptance requirements; it does not silently create new ones. Non-blocking findings may be recorded as backlog, observed, or discarded. They do not automatically authorize rework or another review round. A further review round requires a recorded material blocker, regression, or explicit human or Supervisor trigger.
+
+### Operational observation boundary
+
+Operational observations inform Supervisor judgment; they do not decide it. Observation ≠ authorization, and evidence ≠ completion. An available capability is not an instruction to use it, and an observation cannot independently authorize a route, relax a requirement, or accept an outcome.
+
+Live operational records remain separate from this public structural surface. Consumers of observations do not acquire execution-governance authority by presenting them. This account describes the relationship between evidence and judgment without publishing live operational state or prescribing an observation implementation.
+
+These boundaries explain how authority, bounded work, independent review, and stopping relate. They deliberately omit the complete internal policy, operational records, and implementation specification.
+
 ---
 
 ## Non-Equivalence Rules

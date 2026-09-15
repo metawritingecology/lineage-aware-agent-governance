@@ -14,6 +14,18 @@ high-intensity multi-agent working environment.
   `scripts/` is under the [MIT License](scripts/LICENSE). Attribution does not
   imply endorsement.
 
+## Architecture at a glance
+
+This candidate / related MWE surface remains a selected structural projection, intentionally incomplete and not a confirmed MWE component or a full production specification.
+
+- **Authority:** Supervisor is the sole execution-governance authority within policy and retained human authorization. Routing, capacity, credential, and execution-boundary systems provide subordinate capabilities or evidence; they do not independently make governance decisions.
+- **Routes and independence:** Route = Interface × Lineage remains the route model. Qualification precedes optimization, and lineage gates reviewer independence. Another interface alone does not provide an independent reviewer. Lineage independence is a necessary gate, distinct from review-context independence.
+- **Lifecycle:** Managed Dispatch bounds execution and review, permits one writer per candidate, and uses candidate freeze and refreeze to bind review to the work being assessed. Blocking findings require repair, refreeze, and return to review before verification.
+- **Convergence:** COMPLETE means usable work that satisfies explicit acceptance requirements without a known material blocker. ACCEPT requires COMPLETE and no unresolved blocking finding, then STOP. Completion ≠ perfection; non-blocking findings do not automatically reopen work.
+- **Observation:** Operational observations inform Supervisor judgment without deciding it. Evidence ≠ completion, and observation ≠ authorization. Live operational records remain separate from this public account.
+
+See [the governance surface](GOVERNANCE_SURFACE.md#execution-authority-lifecycle-and-observation-boundary) for these architectural boundaries and their deliberately limited public scope. Human retained authority remains in force.
+
 ## What this is
 
 This repository publishes a single boundary document,

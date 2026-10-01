@@ -200,6 +200,40 @@ Routing, capacity, credential, and execution-boundary systems are subordinate ca
 
 The route model remains Route = Interface × Lineage. Supervisor authority describes who decides; the route model describes the route being considered. Lineage gates reviewer independence, and qualification precedes optimization. Access through a different interface does not by itself establish an independent lineage.
 
+### Task identity and assignment continuity
+
+The intermediate Supervisor-managed task layer gives work a stable identity,
+an assignment, and recorded state independently of any conversational turn.
+A task identifier refers to the work being governed; an individual execution
+attempt or review is a separate event associated with that work. When recovery
+requires a successor task, the relationship must remain explicit.
+
+Supervisor retains responsibility for assignment and continuation within the
+applicable authorization. A new interaction does not silently create a new
+assignment, reset the work's limits, or erase the state needed to continue it.
+This provides a stable point from which another interaction can identify the
+work and determine its next authorized action.
+
+### Conversational coordination on an existing task layer
+
+In the operator's reported use, adding [ChatGPT Dots](https://chatgpt.com/features/dots/)
+was a low-friction way to improve ongoing task tracking and coordination.
+The existing dispatch, handoff, and acceptance structure did not need to be
+rebuilt. The dot could coordinate around identified work and return to its
+recorded state across interaction boundaries.
+
+The continuity mechanism was already provided by the intermediate
+Supervisor-managed task layer. Dots made that existing capability more
+convenient to use; it did not originate the task identity or handoff mechanism,
+and it did not replace Supervisor's execution-governance authority.
+
+In this setup, an individual interaction or tool-response timeout no longer had
+to become a loss of the work's identity or a need to reconstruct the assignment
+from conversation alone. Underlying timeouts still existed. Uncertain work
+state still required reconciliation, and some interruptions required an explicit
+recovery decision. The observation concerns this operating practice; it does not
+establish universal recovery behavior or a measured performance gain.
+
 ### Enforced lifecycle
 
 Managed Dispatch is the accepted execution mode. Workers act within bounded assignments, with one writer per candidate and bounded execution and review rounds. A candidate is frozen for review so that review applies to an identified, stable body of work. Independent review requires lineage independence from the candidate's author chain; changing interfaces alone does not satisfy that requirement. Lineage independence is a necessary gate, distinct from review-context independence.
@@ -209,6 +243,18 @@ A blocking finding requires rework, repair, successful candidate refreeze, and r
 COMPLETE means that the requested outcome is usable, explicit acceptance requirements are satisfied, and no known material blocker prevents intended use. Completion ≠ perfection. ACCEPT requires COMPLETE with no unresolved blocking finding; acceptance then converges on STOP. Once COMPLETE, stop. Further work requires a concrete present failure or regression, or an explicit requirement from the retained human authority or Supervisor.
 
 Review tests the stated acceptance requirements; it does not silently create new ones. Non-blocking findings may be recorded as backlog, observed, or discarded. They do not automatically authorize rework or another review round. A further review round requires a recorded material blocker, regression, or explicit human or Supervisor trigger.
+
+### Review scope and revision identity
+
+Review evidence remains attached to the revision and scope actually reviewed.
+When review is divided into portions, coverage of those portions must remain
+distinguishable from a claim about the whole candidate.
+
+A later repair changes the review object. Prior findings may remain relevant,
+but acceptance of an earlier revision does not automatically certify the
+current one. Passing regression tests provides evidence about the tested
+properties; it does not replace independent review still required for the
+current candidate.
 
 ### Operational observation boundary
 
@@ -306,6 +352,19 @@ and passes run in parallel. Sequential blind review is a weaker, distinct
 category and should be labelled as such. This is a further reason the lineage
 rule is only a minimum anti-duplication boundary: it bounds one axis and leaves
 the other to be managed explicitly.
+
+### Context sufficiency and finding interpretation
+
+A finding may expose an artifact defect, a limitation in the evidence supplied
+to the reviewer, or an unresolved combination of both. Where review used a
+restricted portion of the work, a disputed finding should be checked against
+the relevant full context.
+
+The original finding remains part of the record. Confirmed defects remain
+actionable; findings unsupported by the fuller evidence should not silently
+become new acceptance requirements. This distinction requires an explicit
+basis for the finding's disposition, not permission to dismiss an unfavorable
+review.
 
 ---
 
@@ -581,6 +640,22 @@ Depending on task conditions, evidence may include:
 Evidence requirements should follow the relevant task boundary.
 
 Agent confidence is not a substitute for required evidence.
+
+### Acceptance, integration, and observed operation
+
+An accepted candidate, its integration into active source, its activation in a
+running environment, and observation of the intended behavior are distinct
+claims. Evidence for one does not automatically establish the others.
+
+The required end state follows the task's acceptance conditions. Not every
+task requires deployment or live operation. Where the requested outcome is a
+working capability, however, source acceptance or a successful isolated test
+cannot substitute for evidence of that capability operating within its intended
+boundary.
+
+Configured capacity and demonstrated capacity should likewise remain separate.
+A declared limit describes what a configuration permits; an observed result
+describes what was exercised under the recorded conditions.
 
 ---
 

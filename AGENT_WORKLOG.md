@@ -195,3 +195,14 @@ this file are defined in `AGENTS.md`.
 - Review snapshot: GOVERNANCE_SURFACE.md candidate SHA-256 36a1ecf7baa57709f5e87638fe5a78921c80f0b987c1a26b3ef3cadbcebec1a1. Review result and public evidence reference are pending at draft creation; no completed independent-review verdict is asserted here.
 - Evidence boundary: The continuity and integration account is an operator-reported observation of this setup. The intermediate task layer already supplied identity, assignment, and recorded state; Dots did not create the underlying handoff mechanism. No universal recovery guarantee, quantified performance gain, or new formal MWE relation is claimed.
 - Owner-reserved: Review disposition and merge. This draft neither authorizes merge nor changes the existing selected-public-surface boundary.
+
+## 2026-10-05 - Path hygiene and sensitive-data handling
+
+- Agent: OpenAI assistant. No independent review was performed.
+- Task: Add the owner-requested path-verification, handoff-scope, public-path hygiene, sensitive-data authorization, and pre-submission checks to existing agent instructions.
+- Files changed: AGENTS.md and AGENT_WORKLOG.md, by tail append only.
+- Verification: Inspected the complete proposed two-file diff; confirmed both original files remain exact byte prefixes and scanned the additions for concrete local paths, personal usernames, credentials, and sensitive values. The rules preserve existing authority boundaries and require an explicitly authorized, recorded narrow privacy correction before any append-only evidence redaction.
+- Tests/checks: Text-only verification; repository scripts, build checks, and test suites were not run.
+- Pre-append inventory: No open pull requests. The three existing non-main remote branches match the heads of PRs #1, #2, and #3, all merged into main. Local checkout inventory was unavailable; no user computer was inspected. This inventory is evidence only and authorizes no integration action.
+- Result: Governance additions only; no conceptual document or historical record content changed.
+- Unresolved questions and risks: Independent review remains unperformed. These instructions do not themselves add an automated enforcement gate or establish that old commits or other branches are free of sensitive content.

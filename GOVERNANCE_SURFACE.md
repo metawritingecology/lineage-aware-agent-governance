@@ -234,6 +234,54 @@ state still required reconciliation, and some interruptions required an explicit
 recovery decision. The observation concerns this operating practice; it does not
 establish universal recovery behavior or a measured performance gain.
 
+### Multiple entry points to the task layer
+
+In the operator's October 2026 account, a fixed Model Context Protocol (MCP)
+entry point and a mobile / on-demand entry point could exchange scoped data
+through their respective Gateways, inspect recorded work state across Gateways,
+and provide access to already-authorized dispatch. Gateways expose these access
+paths within their applicable boundaries.
+Here, entry points are access paths for governed work, not model routes or
+additional authorities. A capability observed at one does not establish it at
+the other. This account does not specify a shared Supervisor instance or state
+store; Supervisor's governance authority remains as described above.
+
+The following continuity requirements apply the existing authority and
+one-writer boundaries; they do not describe deployed cross-Gateway identity,
+lease, fencing, or recovery mechanisms. Before continuation, the governing
+authority and authoritative assignment/state for the task must be identified.
+A repeated request must not create a competing assignment or writer. A copied
+status summary is not authoritative merely because it crossed a Gateway.
+Work in another environment is a separate Dispatch Instance that must be
+qualified for the operation and authorized for the data and purpose.
+
+A handoff should identify the expected source revision and required artifact
+set using portable names. A manifest and hashes support comparison against an
+expected source recorded or verified independently of the transferred copy;
+they do not establish origin, authenticity, validity, or authorization. The
+receiver must separately confirm receipt of the complete required set,
+agreement with that expectation, and local accessibility. For mutable state,
+the live-record snapshot and dependency-footprint rules still apply. Permission
+to exchange data does not authorize execution, onward disclosure, publication,
+or acceptance.
+
+An established terminal outcome must not be discarded merely because contact
+is lost. An unresolved outcome remains unknown; timeout or lease expiry alone
+does not show that an
+attempt stopped or failed. Before retrying, its assignment, state, and possible
+side effects must be reconciled, and writes from a superseded attempt must not
+be accepted into the candidate. Reachability confers no execution permission.
+Where reconciliation reveals an unresolved authority conflict, the existing
+stop-and-human-clarification rule applies; this adds no general requirement for
+human approval of Supervisor reassignment within existing authorization.
+
+The operator report did not establish complete required-artifact delivery and
+automatic follow-up through the full task lifecycle. Exchanging some data or
+reading state is narrower than proving that the full required set arrived and
+that later task progress was tracked. Connectivity alone does not qualify an
+additional entry point for dispatch. Further entry points and automatic recovery
+are outside this account unless exercised with evidence.
+
 ### Enforced lifecycle
 
 Managed Dispatch is the accepted execution mode. Workers act within bounded assignments, with one writer per candidate and bounded execution and review rounds. A candidate is frozen for review so that review applies to an identified, stable body of work. Independent review requires lineage independence from the candidate's author chain; changing interfaces alone does not satisfy that requirement. Lineage independence is a necessary gate, distinct from review-context independence.

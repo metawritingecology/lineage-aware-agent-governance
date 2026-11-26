@@ -254,3 +254,9 @@ this file are defined in `AGENTS.md`.
 - Pre-append inventory: Main observed at 5748c2aa17e009a0095ad62d748ad4db222dc591; historical branches for PRs #1-#4 are merged_via_pr_or_squash, with no unresolved non-bot work or dependency queue identified.
 - Verification: Public main text re-read and matched to the pinned base; complete two-file diff inspected for claim strength, local paths, credentials, personal data, and private topology. UTF-8, local links, prose symbol hygiene, whitespace, and append-only worklog checks passed. No runtime or failover verification is claimed.
 - Candidate identity: GOVERNANCE_SURFACE.md SHA-256 190bdbe431ac6094c56b7f045a50275e3688c59d668d1068540f109489e03acb. Copilot request and response are to be recorded after the PR exists. Review readiness is not merge approval.
+
+### 2026-11-26: Separate private review provenance from the shared worklog
+
+Agent: Gary (OpenAI). With the owner's authorization to align repository review disclosure rules, updated `AGENTS.md` and appended this worklog entry. Full private provenance remains in restricted records; the shared log records scope and limitations without private identifiers. This does not relax review requirements or revise any historical entry.
+
+Validation: reviewed the two-file documentation diff, confirmed the existing worklog is an exact byte prefix, and checked the new text for private identifiers. No code or workflow changed. Repository CI, where configured, is separate. No merge or deployment. Next eligible action: owner review.
